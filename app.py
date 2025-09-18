@@ -9,7 +9,7 @@ import json
 import requests
 import time
 from datetime import datetime, timedelta
-public import re
+import re
 from urllib.parse import urlparse
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
@@ -19,7 +19,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 # API Keys (In production, these should be environment variables)

@@ -1,24 +1,52 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>secure-site-finder</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard - Phishing Detection System</title>
+    <meta name="description" content="Advanced phishing detection system to analyze and identify malicious websites">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🛡️ PhishGuard</h1>
+            <p>Advanced Phishing Detection System</p>
+        </header>
 
-    <meta property="og:title" content="secure-site-finder" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- URL Analysis Section -->
+            <section class="url-section">
+                <h2>URL Security Analysis</h2>
+                <div class="input-group">
+                    <input type="url" id="urlInput" placeholder="Enter URL to analyze (e.g., https://example.com)">
+                    <button id="analyzeBtn" class="btn-primary">Analyze URL</button>
+                </div>
+                <div id="analysisResults" class="results-section"></div>
+            </section>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+            <!-- History Section -->
+            <section class="history-section">
+                <h2>Analysis History</h2>
+                <div id="historyList" class="history-list"></div>
+            </section>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+            <!-- Quiz Section -->
+            <section class="quiz-section">
+                <h2>Phishing Awareness Quiz</h2>
+                <div id="quizContainer" class="quiz-container">
+                    <button id="startQuizBtn" class="btn-secondary">Start Quiz</button>
+                    <div id="quizContent" class="quiz-content hidden"></div>
+                    <div id="quizResults" class="quiz-results hidden"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="feature_script.js"></script>
+    <script src="script.js"></script>
+</body>
 </html>
