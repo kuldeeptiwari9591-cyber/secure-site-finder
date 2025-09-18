@@ -1,0 +1,156 @@
+/* PhishGuard - Advanced Phishing Detection System Styles */
+
+.gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.detection-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.detection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.danger-indicator {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.safe-indicator {
+    color: #10b981;
+}
+
+.warning-indicator {
+    color: #f59e0b;
+}
+
+.danger-indicator {
+    color: #ef4444;
+}
+
+.analysis-result {
+    min-height: 200px;
+    background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+}
+
+.feature-icon {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-button.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.quiz-option {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.quiz-option:hover {
+    background-color: #f3f4f6;
+}
+
+.quiz-option.correct {
+    background-color: #d1fae5;
+    border-color: #10b981;
+}
+
+.quiz-option.incorrect {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+}
+
+/* History section styles */
+.history-card {
+    background: linear-gradient(145deg, #ffffff, #f1f5f9);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.history-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.status-safe {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Loading animation */
+.loading-spinner {
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Feature analysis styles */
+.feature-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.feature-item {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+}
+
+.feature-item.pass {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+}
+
+.feature-item.fail {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.feature-item.warning {
+    border-color: #f59e0b;
+    background-color: #fffbeb;
+}
