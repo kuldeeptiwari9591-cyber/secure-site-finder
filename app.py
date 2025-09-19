@@ -19,14 +19,13 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, static_folder='.', static_url_path='', template_folder='.')
 CORS(app)
 
-# API Keys (In production, these should be environment variables)
-# User needs to set these as environment variables
-GOOGLE_SAFE_BROWSING_API_KEY = os.getenv('GOOGLE_SAFE_BROWSING_API_KEY', '')
-WHOISXML_API_KEY = os.getenv('WHOISXML_API_KEY', '')
-VIRUSTOTAL_API_KEY = os.getenv('VIRUSTOTAL_API_KEY', '')
+# API Keys provided by user
+GOOGLE_SAFE_BROWSING_API_KEY = 'AIzaSyC9JhAQgRUiMsvHDCl_h1K-3LxjKIkUJ9g'
+WHOISXML_API_KEY = 'at_yHbGBEeBpmSAT5K5LMAYjUirsqTEh'
+VIRUSTOTAL_API_KEY = '317c222ce390ea39dea87fc68ab82f45b411e7300bebc941ebb0c9ad3916d49f'
 
 # Cache for API responses to avoid rate limiting
 response_cache = {}

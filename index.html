@@ -15,32 +15,58 @@
             <p>Advanced Phishing Detection System</p>
         </header>
 
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-button active" onclick="switchTab('detector')">URL Detector</button>
+            <button class="tab-button" onclick="switchTab('quiz')">Phishing Quiz</button>
+            <button class="tab-button" onclick="switchTab('history')">Analysis History</button>
+        </nav>
+
         <!-- Main Content -->
         <main class="main-content">
-            <!-- URL Analysis Section -->
-            <section class="url-section">
+            <!-- URL Detection Tab -->
+            <section id="detector-tab" class="tab-content active">
                 <h2>URL Security Analysis</h2>
                 <div class="input-group">
                     <input type="url" id="urlInput" placeholder="Enter URL to analyze (e.g., https://example.com)">
-                    <button id="analyzeBtn" class="btn-primary">Analyze URL</button>
+                    <button id="analyzeBtn" class="btn-primary" onclick="analyzeURL()">Analyze URL</button>
                 </div>
-                <div id="analysisResults" class="results-section"></div>
+                <div id="urlResults" class="results-section analysis-result"></div>
             </section>
 
-            <!-- History Section -->
-            <section class="history-section">
-                <h2>Analysis History</h2>
-                <div id="historyList" class="history-list"></div>
-            </section>
-
-            <!-- Quiz Section -->
-            <section class="quiz-section">
+            <!-- Quiz Tab -->
+            <section id="quiz-tab" class="tab-content">
                 <h2>Phishing Awareness Quiz</h2>
                 <div id="quizContainer" class="quiz-container">
-                    <button id="startQuizBtn" class="btn-secondary">Start Quiz</button>
-                    <div id="quizContent" class="quiz-content hidden"></div>
+                    <button id="startQuizBtn" class="btn-secondary" onclick="initializeQuiz()">Start Quiz</button>
+                    <div id="quizContent" class="quiz-content hidden">
+                        <div class="quiz-header">
+                            <div class="quiz-progress">
+                                <div class="progress-bar" id="progressBar"></div>
+                            </div>
+                            <div class="quiz-info">
+                                <span id="questionCounter">Question 1 of 5</span>
+                                <span id="scoreDisplay">Score: 0</span>
+                            </div>
+                        </div>
+                        <div id="questionContainer" class="question-container"></div>
+                        <div class="quiz-navigation">
+                            <button id="prevBtn" class="btn-secondary" onclick="previousQuestion()">Previous</button>
+                            <button id="nextBtn" class="btn-primary" onclick="nextQuestion()">Next</button>
+                        </div>
+                    </div>
                     <div id="quizResults" class="quiz-results hidden"></div>
                 </div>
+            </section>
+
+            <!-- History Tab -->
+            <section id="history-tab" class="tab-content">
+                <h2>Analysis History</h2>
+                <div class="history-controls">
+                    <button onclick="loadAnalysisHistory()" class="btn-secondary">Refresh History</button>
+                    <button onclick="clearHistory()" class="btn-danger">Clear All History</button>
+                </div>
+                <div id="historyList" class="history-list"></div>
             </section>
         </main>
     </div>

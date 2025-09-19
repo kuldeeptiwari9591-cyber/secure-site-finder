@@ -221,26 +221,53 @@ function switchTab(tabName) {
     });
     
     // Show selected tab
-    document.getElementById(tabName + '-tab').classList.add('active');
+    const selectedTab = document.getElementById(tabName + '-tab');
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    // Add active class to clicked button
     event.target.classList.add('active');
+    
+    // Load specific tab content
+    if (tabName === 'history') {
+        loadAnalysisHistory();
+    } else if (tabName === 'quiz') {
+        // Quiz content is handled by initializeQuiz
+    }
 }
 
 // Main URL analysis function
 async function analyzeURL() {
     const urlInput = document.getElementById('urlInput');
     const resultsDiv = document.getElementById('urlResults');
+    
+    if (!urlInput || !resultsDiv) {
+        console.error('Required DOM elements not found');
+        return;
+    }
+    
     const url = urlInput.value.trim();
     
     if (!url) {
-        resultsDiv.innerHTML = '<div class="text-red-500">Please enter a URL to analyze.</div>';
+        resultsDiv.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 20px;">Please enter a URL to analyze.</div>';
+        return;
+    }
+    
+    // Validate URL format
+    try {
+        new URL(url);
+    } catch (e) {
+        resultsDiv.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 20px;">Please enter a valid URL (include http:// or https://)</div>';
         return;
     }
     
     // Show loading state
     resultsDiv.innerHTML = `
-        <div class="flex items-center justify-center">
+        <div style="text-align: center; padding: 40px;">
             <div class="loading-spinner"></div>
-            <span class="ml-3">Analyzing URL...</span>
+            <div style="margin-top: 15px; font-size: 18px; color: #667eea;">Analyzing URL...</div>
+            <div style="margin-top: 10px; color: #6b7280;">This may take a few seconds</div>
         </div>
     `;
     
@@ -330,31 +357,57 @@ function calculateRiskScore(basicFeatures, advancedFeatures) {
     let riskScore = 0;
     let totalFeatures = 0;
     
-    // Basic features scoring
-    Object.values(basicFeatures).forEach(feature => {
-        if (typeof feature === 'boolean') {
+    // Basic features scoring (each suspicious feature adds points)
+    Object.entries(basicFeatures).forEach(([key, value]) => {
+        if (typeof value === 'boolean') {
             totalFeatures++;
-            if (feature) riskScore++; // Suspicious features increase risk
+            // Most features are suspicious when true, except hasHttps which is good when true
+            if (key === 'hasHttps') {
+                if (!value) riskScore += 2; // Missing HTTPS is very suspicious
+            } else {
+                if (value) riskScore++; // Suspicious features increase risk
+            }
         }
     });
     
-    // Advanced features scoring
-    Object.values(advancedFeatures).forEach(feature => {
-        if (typeof feature === 'boolean') {
+    // Advanced features scoring with weighted importance
+    Object.entries(advancedFeatures).forEach(([key, value]) => {
+        if (typeof value === 'boolean') {
             totalFeatures++;
-            if (feature) riskScore++;
+            if (value) {
+                // Weight critical security indicators more heavily
+                if (key === 'google_safe_browsing_threat' || key === 'virustotal_high_risk') {
+                    riskScore += 5; // Critical threats
+                } else if (key === 'ssl_self_signed' || key === 'suspicious_content_patterns') {
+                    riskScore += 3; // High risk indicators
+                } else {
+                    riskScore += 1; // Standard suspicious features
+                }
+            }
+        } else if (key === 'virustotal_detections' && typeof value === 'number') {
+            totalFeatures++;
+            if (value > 0) {
+                riskScore += Math.min(value, 10); // Cap at 10 points for VT detections
+            }
         }
     });
     
-    return totalFeatures > 0 ? Math.round((riskScore / totalFeatures) * 100) : 0;
+    return totalFeatures > 0 ? Math.round((riskScore / Math.max(totalFeatures, 15)) * 100) : 0;
 }
 
 // Determine overall status
 function determineStatus(basicFeatures, advancedFeatures) {
+    // Check for immediate high-risk indicators
+    if (advancedFeatures.google_safe_browsing_threat || 
+        advancedFeatures.virustotal_high_risk ||
+        (advancedFeatures.virustotal_detections && advancedFeatures.virustotal_detections > 5)) {
+        return 'danger';
+    }
+    
     const score = calculateRiskScore(basicFeatures, advancedFeatures);
     
-    if (score < 30) return 'safe';
-    if (score < 70) return 'warning';
+    if (score < 25) return 'safe';
+    if (score < 60) return 'warning';
     return 'danger';
 }
 
@@ -363,30 +416,35 @@ function displayAnalysisResults(result, container) {
     const statusClass = result.status === 'safe' ? 'safe-indicator' : 
                        result.status === 'warning' ? 'warning-indicator' : 'danger-indicator';
     
-    const statusIcon = result.status === 'safe' ? 'shield-alt' : 
+    const statusIcon = result.status === 'safe' ? 'shield-check' : 
                       result.status === 'warning' ? 'exclamation-triangle' : 'ban';
     
     const statusText = result.status === 'safe' ? 'Likely Safe' : 
                       result.status === 'warning' ? 'Potentially Suspicious' : 'Likely Malicious';
     
+    const statusMessage = result.status === 'safe' ? 'This URL appears to be legitimate and safe to visit.' :
+                         result.status === 'warning' ? 'This URL has some suspicious characteristics. Exercise caution.' :
+                         'This URL shows multiple red flags. Avoid visiting this site.';
+    
     container.innerHTML = `
-        <div class="text-center mb-6">
-            <i class="fas fa-${statusIcon} text-6xl ${statusClass} mb-4"></i>
-            <h3 class="text-2xl font-bold ${statusClass}">${statusText}</h3>
-            <p class="text-gray-600">Risk Score: ${result.riskScore}%</p>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <i class="fas fa-${statusIcon}" style="font-size: 4em; margin-bottom: 20px;" class="${statusClass}"></i>
+            <h3 style="font-size: 2em; font-weight: bold; margin-bottom: 10px;" class="${statusClass}">${statusText}</h3>
+            <div style="font-size: 1.5em; font-weight: 600; margin-bottom: 10px;">Risk Score: <span class="${statusClass}">${result.riskScore}%</span></div>
+            <p style="color: #6b7280; font-size: 1.1em; max-width: 600px; margin: 0 auto;">${statusMessage}</p>
         </div>
         
         <div class="feature-list">
-            ${generateFeatureList(result.basicFeatures, 'Basic Analysis')}
-            ${Object.keys(result.advancedFeatures).length > 0 ? generateFeatureList(result.advancedFeatures, 'Advanced Analysis') : ''}
+            ${generateFeatureList(result.basicFeatures, 'Basic URL Analysis')}
+            ${Object.keys(result.advancedFeatures || {}).length > 0 ? generateFeatureList(result.advancedFeatures, 'Advanced Security Analysis') : ''}
         </div>
         
-        <div class="mt-6 text-center">
-            <button onclick="shareResults('${result.url}')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2">
-                Share Results
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="shareResults('${encodeURIComponent(result.url)}')" class="btn-secondary" style="margin-right: 10px;">
+                <i class="fas fa-share-alt"></i> Share Results
             </button>
-            <button onclick="reportUrl('${result.url}')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                Report Malicious
+            <button onclick="reportUrl('${encodeURIComponent(result.url)}')" class="btn-danger">
+                <i class="fas fa-flag"></i> Report as Malicious
             </button>
         </div>
     `;
@@ -394,22 +452,48 @@ function displayAnalysisResults(result, container) {
 
 // Generate feature list HTML
 function generateFeatureList(features, title) {
-    let html = `<div class="mb-4"><h4 class="font-bold text-lg mb-2">${title}</h4>`;
+    if (!features || Object.keys(features).length === 0) {
+        return '';
+    }
+    
+    let html = `<div style="margin-bottom: 25px;">
+        <h4 style="font-size: 1.3em; font-weight: bold; margin-bottom: 15px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">${title}</h4>`;
     
     Object.entries(features).forEach(([key, value]) => {
-        const status = value ? 'fail' : 'pass';
-        const icon = value ? 'times' : 'check';
-        const statusText = value ? 'Suspicious' : 'OK';
+        // Skip non-boolean values for display unless they're important numbers
+        if (typeof value !== 'boolean' && !(key === 'virustotal_detections' && typeof value === 'number')) {
+            return;
+        }
+        
+        let status, icon, statusText, statusColor;
+        
+        if (typeof value === 'boolean') {
+            // Special case for hasHttps - this should be true for safety
+            if (key === 'hasHttps') {
+                status = value ? 'pass' : 'fail';
+                icon = value ? 'check' : 'times';
+                statusText = value ? 'Secured with HTTPS' : 'Missing HTTPS';
+                statusColor = value ? '#10b981' : '#ef4444';
+            } else {
+                status = value ? 'fail' : 'pass';
+                icon = value ? 'times' : 'check';
+                statusText = value ? 'Suspicious' : 'OK';
+                statusColor = value ? '#ef4444' : '#10b981';
+            }
+        } else if (key === 'virustotal_detections') {
+            status = value > 0 ? 'fail' : 'pass';
+            icon = value > 0 ? 'times' : 'check';
+            statusText = value > 0 ? `${value} detections` : 'Clean';
+            statusColor = value > 0 ? '#ef4444' : '#10b981';
+        }
         
         html += `
-            <div class="feature-item ${status} mb-2">
-                <div class="flex justify-between items-center">
-                    <span>${formatFeatureName(key)}</span>
-                    <span class="flex items-center">
-                        <i class="fas fa-${icon} mr-1"></i>
-                        ${statusText}
-                    </span>
-                </div>
+            <div class="feature-item ${status}" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+                <span style="font-weight: 500;">${formatFeatureName(key)}</span>
+                <span style="display: flex; align-items: center; color: ${statusColor}; font-weight: 600;">
+                    <i class="fas fa-${icon}" style="margin-right: 8px;"></i>
+                    ${statusText}
+                </span>
             </div>
         `;
     });
