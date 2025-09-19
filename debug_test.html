@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test Page</h1>
+    <button onclick="testAnalyze()">Test Analyze Function</button>
+    <button onclick="testQuiz()">Test Quiz Function</button>
+    <button onclick="testSwitchTab()">Test Switch Tab</button>
+    <div id="test-results"></div>
+    
+    <script src="feature_script.js"></script>
+    <script>
+        // Simple test functions
+        function testAnalyze() {
+            console.log('Testing analyze function...');
+            if (typeof analyzeURL === 'function') {
+                console.log('✓ analyzeURL function exists');
+            } else {
+                console.error('✗ analyzeURL function missing');
+            }
+        }
+        
+        function testQuiz() {
+            console.log('Testing quiz function...');
+            if (typeof initializeQuiz === 'function') {
+                console.log('✓ initializeQuiz function exists');
+            } else {
+                console.error('✗ initializeQuiz function missing');
+            }
+        }
+        
+        function testSwitchTab() {
+            console.log('Testing switchTab function...');
+            if (typeof switchTab === 'function') {
+                console.log('✓ switchTab function exists');
+            } else {
+                console.error('✗ switchTab function missing');
+            }
+        }
+        
+        // Test feature script functions
+        if (typeof checkUrlLength === 'function') {
+            console.log('✓ Feature script loaded successfully');
+            console.log('Test: checkUrlLength("https://example.com") =', checkUrlLength("https://example.com"));
+        } else {
+            console.error('✗ Feature script not loaded');
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

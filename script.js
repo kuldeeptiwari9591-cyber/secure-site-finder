@@ -1,6 +1,24 @@
 // PhishGuard - Main JavaScript File
 // Handles UI interactions, quiz functionality, and API bridge
 
+console.log('PhishGuard script.js loaded');
+
+// Test function to verify everything works
+function testFunctions() {
+    console.log('Testing basic functions...');
+    console.log('analyzeURL function:', typeof analyzeURL);
+    console.log('switchTab function:', typeof switchTab);
+    console.log('initializeQuiz function:', typeof initializeQuiz);
+    
+    // Test feature script functions
+    if (typeof checkUrlLength !== 'undefined') {
+        console.log('Feature script functions loaded successfully');
+        console.log('Test URL length check:', checkUrlLength('https://example.com'));
+    } else {
+        console.error('Feature script functions not loaded');
+    }
+}
+
 // Global Variables
 let currentQuestionIndex = 0;
 let currentSetIndex = 0;
@@ -179,19 +197,23 @@ const quizSets = [
 
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, starting initialization...');
+    testFunctions();
     initializeApp();
     loadAnalysisHistory();
-    displayThreatFeed();
 });
 
 // Initialize the application
 function initializeApp() {
-    initializeQuiz();
+    console.log('Initializing PhishGuard app...');
     setupEventListeners();
+    initializeQuiz();
 }
 
 // Setup event listeners
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
     // URL input enter key handler
     const urlInput = document.getElementById('urlInput');
     if (urlInput) {
@@ -201,6 +223,19 @@ function setupEventListeners() {
             }
         });
     }
+    
+    // Add click handlers for buttons (backup in case onclick fails)
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    if (analyzeBtn) {
+        analyzeBtn.addEventListener('click', analyzeURL);
+    }
+    
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    if (startQuizBtn) {
+        startQuizBtn.addEventListener('click', initializeQuiz);
+    }
+    
+    console.log('Event listeners setup complete');
 }
 
 // Scroll to detector section
@@ -208,8 +243,10 @@ function scrollToDetector() {
     document.getElementById('detector').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Switch between tabs (though currently only using URL scanner)
+// Switch between tabs
 function switchTab(tabName) {
+    console.log('Switching to tab:', tabName);
+    
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
@@ -226,24 +263,29 @@ function switchTab(tabName) {
         selectedTab.classList.add('active');
     }
     
-    // Add active class to clicked button
-    event.target.classList.add('active');
+    // Add active class to clicked button (use event.target safely)
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
     
     // Load specific tab content
     if (tabName === 'history') {
         loadAnalysisHistory();
     } else if (tabName === 'quiz') {
-        // Quiz content is handled by initializeQuiz
+        initializeQuiz();
     }
 }
 
 // Main URL analysis function
 async function analyzeURL() {
+    console.log('Starting URL analysis...');
+    
     const urlInput = document.getElementById('urlInput');
     const resultsDiv = document.getElementById('urlResults');
     
     if (!urlInput || !resultsDiv) {
         console.error('Required DOM elements not found');
+        alert('Error: Could not find required elements on page');
         return;
     }
     
@@ -254,11 +296,17 @@ async function analyzeURL() {
         return;
     }
     
+    // Add protocol if missing
+    let processedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        processedUrl = 'https://' + url;
+    }
+    
     // Validate URL format
     try {
-        new URL(url);
+        new URL(processedUrl);
     } catch (e) {
-        resultsDiv.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 20px;">Please enter a valid URL (include http:// or https://)</div>';
+        resultsDiv.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 20px;">Please enter a valid URL (e.g., example.com or https://example.com)</div>';
         return;
     }
     
@@ -273,18 +321,18 @@ async function analyzeURL() {
     
     try {
         // Check if URL exists in history first
-        const historicalResult = checkUrlHistory(url);
+        const historicalResult = checkUrlHistory(processedUrl);
         if (historicalResult) {
             displayAnalysisResults(historicalResult, resultsDiv);
             return;
         }
         
         // Perform new analysis
-        const basicFeatures = await analyzeBasicFeatures(url);
-        const advancedFeatures = await analyzeAdvancedFeatures(url);
+        const basicFeatures = await analyzeBasicFeatures(processedUrl);
+        const advancedFeatures = await analyzeAdvancedFeatures(processedUrl);
         
         const result = {
-            url: url,
+            url: processedUrl,
             timestamp: new Date().toISOString(),
             basicFeatures: basicFeatures,
             advancedFeatures: advancedFeatures,
@@ -299,7 +347,8 @@ async function analyzeURL() {
         displayAnalysisResults(result, resultsDiv);
         
     } catch (error) {
-        resultsDiv.innerHTML = `<div class="text-red-500">Error analyzing URL: ${error.message}</div>`;
+        console.error('Analysis error:', error);
+        resultsDiv.innerHTML = `<div style="color: #ef4444; text-align: center; padding: 20px;">Error analyzing URL: ${error.message}</div>`;
     }
 }
 
